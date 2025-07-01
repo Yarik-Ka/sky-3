@@ -1,4 +1,4 @@
-# src/masks.py
+
 
 def get_mask_card_number(card_number: str) -> str:
     clean_number = card_number.replace(" ", "")
@@ -8,6 +8,7 @@ def get_mask_card_number(card_number: str) -> str:
     end = clean_number[-4:]
     masked_middle = '**** ****'
     return f"{start} {masked_middle} {end}"
+
 
 def get_mask_account(account_number: str) -> str:
     clean_number = account_number.replace(" ", "")
