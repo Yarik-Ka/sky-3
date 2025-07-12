@@ -20,107 +20,93 @@ transactions = [
         "to": "Счет 75651667383060284188",
     },
     {
+        # Транзакция с другим валютным кодом
         "id": 873106923,
         "state": "EXECUTED",
         "date": "2019-03-23T01:09:46.296404",
         "operationAmount": {"amount": "43318.34", "currency": {"name": "руб.", "code": "RUB"}},
+        # Описание есть
         "description": "Перевод со счета на счет",
-        "from": "Счет 44812258784861134719",
-        "to": "Счет 74489636417521191160",
+        # Остальные ключи
+        'from': 'Счет 44812258784861134719',
+        'to': 'Счет 74489636417521191160',
     },
     {
-        "id": 895315941,
-        "state": "EXECUTED",
-        "date": "2018-08-19T04:27:37.904916",
-        "operationAmount": {"amount": "56883.54", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод с карты на карту",
-        "from": "Visa Classic 6831982476737658",
-        "to": "Visa Platinum 8990922113665229",
-    },
-    {
-        "id": 594226727,
-        "state": "CANCELED",
-        "date": "2018-09-12T21:27:25.241689",
-        "operationAmount": {"amount": "67314.70", "currency": {"name": "руб.", "code": "RUB"}},
-        "description": "Перевод организации",
-        "from": "Visa Platinum 1246377376343588",
-        "to": "Счет 14211924144426031657",
+        # Объект без description для теста исключений
     },
 ]
 
 
-def filter_by_currency(transactions: list, currency: str) -> typing.List[dict]:
-    """фильтрует транзакции в зависимости от валюты"""
-    filtered_transactions = [
-        transaction for transaction in transactions if transaction["operationAmount"]["currency"]["code"] == currency
-    ]
-    if not filtered_transactions:
-        return []
-    return filtered_transactions
+def filter_by_currency(transactions: typing.Iterable[dict], currency: str) -> typing.Generator[dict, None, None]:
+    """Фильтрует транзакции по валюте, возвращая генератор."""
+    for transaction in transactions:
+        try:
+            if transaction["operationAmount"]["currency"]["code"] == currency:
+                yield transaction
+        except (KeyError, TypeError):
+            continue
 
 
-if __name__ == "__main__":
-    currency = input("Enter the currency: ")
-    usd_transactions = filter_by_currency(transactions, currency=currency)
-    if usd_transactions:
-        for item in usd_transactions:
-            print(item)
-    else:
-        print(f"There is no {currency} currency in transactions")
-
-
-def transaction_descriptions(transactions: typing.List[dict]) -> typing.List[str]:
-    """выводит описание каждой транзакции по ключу ["description"], если оно входит в множество
-    'acceptable_values'"""
+def transaction_descriptions(transactions: typing.Iterable[dict]) -> typing.Generator[str, None, None]:
+    """Выдает описание каждой транзакции по ключу ['description'], если оно входит в допустимый набор."""
     acceptable_values = {
-        "Перевод организации",
-        "Перевод со счета на счет",
-        "Перевод с карты на карту",
-        "Перевод организации",
+        'Перевод организации',
+        'Перевод со счета на счет',
+        'Перевод с карты на карту'
     }
-    descriptions = []
     for transaction in transactions:
         try:
             description = transaction["description"]
             if description in acceptable_values:
-                descriptions.append(description)
-        except TypeError or KeyError:
-            return []
-    return descriptions
+                yield description
+        except (KeyError, TypeError):
+            continue
 
 
+# Тестовые функции для проверки корректности работы (используем pytest)
+import pytest
+
+
+@pytest.fixture
+def sample_transactions():
+    return [
+        {
+            'id': 1,
+            'description': 'Перевод организации',
+            'operationAmount': {'amount': '1000', 'currency': {'name': 'USD', 'code': 'USD'}}
+        },
+        {
+            'id': 2,
+            'description': 'Некорректное описание',
+            'operationAmount': {'amount': '2000', 'currency': {'name': 'USD', 'code': 'USD'}}
+        },
+        {
+            'id': 3,
+            'description': 'Перевод со счета на счет',
+            'operationAmount': {'amount': '3000', 'currency': {'name': 'EUR', 'code': 'EUR'}}
+        }
+    ]
+
+
+def test_filter_by_currency(sample_transactions):
+    result = list(filter_by_currency(sample_transactions, 'USD'))
+    assert len(result) == 2
+    assert all(t['operationAmount']['currency']['code'] == 'USD' for t in result)
+
+
+def test_transaction_descriptions(sample_transactions):
+    descriptions = list(transaction_descriptions(sample_transactions))
+    assert descriptions == ['Перевод организации', 'Перевод со счета на счет']
+
+
+# Основной блок для запуска примера
 if __name__ == "__main__":
-    descriptions = transaction_descriptions(transactions)
-    if descriptions:
-        for item in descriptions:
-            print(item)
-    else:
-        print("No correct description of the transaction was found")
+    currency_input = input("Введите код валюты (например, USD): ")
 
+    print("Транзакции по валюте:")
+    for t in filter_by_currency(transactions, currency_input):
+        print(t)
 
-def format_card_number(number: str) -> str:
-    """Форматирует номер карты в формат XXXX XXXX XXXX XXXX."""
-    return f"{number[:4]} {number[4:8]} {number[8:12]} {number[12:16]}"
-
-
-def card_number_generator(start: int, stop: int) -> typing.Generator[str, None, None]:
-    """генерирует номера карт в формате XXXX XXXX XXXX XXXX в заданном диапазоне"""
-    if not isinstance(start, int) or not isinstance(stop, int):
-        yield "Incorrect data entered: start and stop must be integers"
-        return
-
-    elif start > stop or start < 0:
-        yield "Incorrect data entered: start must be less than or equal to stop and non-negative"
-        return
-
-    for number in range(start, stop + 1):
-        formatted_number = format_card_number(str(number).zfill(16))
-        yield formatted_number
-
-
-if __name__ == "__main__":
-    try:
-        for card_number in card_number_generator(1, 5):
-            print(card_number)
-    except TypeError:
-        print("Please provide both start and stop arguments")
+    print("\nОписание транзакций:")
+    for desc in transaction_descriptions(transactions):
+        print(desc)
