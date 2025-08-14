@@ -4,3 +4,6 @@
 
 ```bash
 pytest tests/ --maxfail=1 --disable-warnings -q
+
+```
+## теперь добавлен функционал обработки транзакций 
