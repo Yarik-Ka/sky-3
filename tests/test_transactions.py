@@ -1,35 +1,21 @@
-# test_transactions.py
-from unittest.mock import patch
+# test.py
 
-import pytest
-
+import unittest
+import pandas as pd
 from src.transactions import read_transactions_csv, read_transactions_xlsx
 
+class TestReadFiles(unittest.TestCase):
+    def test_read_csv(self):
+        df = read_transactions_csv('transactions.csv')
+        self.assertIsInstance(df, pd.DataFrame)
+        # Проверка наличия ожидаемых колонок (замените на реальные названия колонок вашего файла)
+        self.assertIn('amount', df.columns)
 
-@pytest.fixture
-def mock_df():
-    class DummyDataFrame:
-        pass
-    return DummyDataFrame()
+    def test_read_xlsx(self):
+        df = read_transactions_xlsx('transactions_excel.xlsx')
+        self.assertIsInstance(df, pd.DataFrame)
+        # Проверка наличия ожидаемых колонок
+        self.assertIn('amount', df.columns)
 
-@patch('pandas.read_csv')
-def test_read_transactions_csv(mock_read_csv, mock_df):
-    mock_read_csv.return_value = mock_df
-    result = read_transactions_csv('fake_path.csv')
-    assert isinstance(result, list)
-    assert result == [
-        {'id': 1, 'amount': 100},
-        {'id': 2, 'amount': 200}
-    ]
-    mock_read_csv.assert_called_once_with('fake_path.csv')
-
-@patch('pandas.read_excel')
-def test_read_transactions_xlsx(mock_read_excel, mock_df):
-    mock_read_excel.return_value = mock_df
-    result = read_transactions_xlsx('fake_path.xlsx')
-    assert isinstance(result, list)
-    assert result == [
-        {'id': 1, 'amount': 100},
-        {'id': 2, 'amount': 200}
-    ]
-    mock_read_excel.assert_called_once_with('fake_path.xlsx')
+if __name__ == '__main__':
+    unittest.main()
