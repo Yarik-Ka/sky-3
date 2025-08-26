@@ -65,3 +65,30 @@ def process_bank_operations(data: list[dict], categories: list) -> dict:
 if __name__ == "__main__":
     # Пример вызова функций (можете убрать или оставить по необходимости)
     pass
+
+import re
+from collections import Counter
+
+def process_bank_search(data: list[dict], search: str) -> list[dict]:
+    """
+    Ищет в списке операций те, у которых описание содержит заданную строку.
+    Использует регулярные выражения для поиска.
+    """
+    pattern = re.compile(re.escape(search), re.IGNORECASE)
+    result = [transaction for transaction in data if pattern.search(transaction.get('description', ''))]
+    return result
+
+def process_bank_operations(data: list[dict], categories: list) -> dict:
+    """
+    Подсчитывает количество операций по категориям.
+    Возвращает словарь {категория: количество}.
+    """
+    counts = Counter()
+    for transaction in data:
+        description = transaction.get('description', '')
+        for category in categories:
+            pattern = re.compile(re.escape(category), re.IGNORECASE)
+            if pattern.search(description):
+                counts[category] += 1
+                break  # если категория найдена, переходим к следующей операции
+    return dict(counts)
