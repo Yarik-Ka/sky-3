@@ -3,6 +3,8 @@ import os
 import re
 from collections import Counter
 from json import JSONDecodeError, load
+import pandas as pd
+from pathlib import Path
 
 # Создаем папку logs, если еще не существует
 os.makedirs("logs", exist_ok=True)
@@ -92,3 +94,10 @@ def process_bank_operations(data: list[dict], categories: list) -> dict:
                 counts[category] += 1
                 break  # если категория найдена, переходим к следующей операции
     return dict(counts)
+def load_transactions(file_path: str) -> pd.DataFrame:
+    """Загружает транзакции из Excel."""
+    path = Path(file_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Файл {file_path} не найден")
+    df = pd.read_excel(file_path)
+    return df

@@ -2,7 +2,27 @@ import sys
 from utils import process_bank_search, process_bank_operations
 from data_processing import load_json, load_csv, load_xlsx
 
+from src.utils import load_transactions
+from src.views import main_page
+from src.services import investment_bank
+from src.reports import spending_by_category
 
+if __name__ == "__main__":
+    df = load_transactions("data/operations.xlsx")
+    df["Дата операции"] = pd.to_datetime(df["Дата операции"])
+
+    # Главная страница
+    result = main_page("2025-08-30 14:30:00", df, "user_settings.json")
+    print(result)
+
+    # Инвесткопилка
+    transactions_list = df.to_dict(orient="records")
+    saved = investment_bank("2025-08", transactions_list, 50)
+    print(f"Инвесткопилка: {saved} ₽")
+
+    # Отчёт по категории
+    report = spending_by_category(df, "Супермаркеты")
+    print(report)
 def main():
     print("Программа: Привет! Добро пожаловать в программу работы с банковскими транзакциями.")
     while True:
