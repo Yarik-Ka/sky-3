@@ -1,36 +1,61 @@
-import re
+import typing
 
-def mask_account_card(info: str) -> str:
-    """
-    Маскирует номер карты или счета в строке.
-    Вход:
-        info: строка вида "Visa Platinum 7000792289606361" или "Счет 73654108430135874305"
-    Выход:
-        строка с маскированным номером.
-    """
-    # Разделяем строку на части
-    parts = info.split()
-    # Определяем тип (карта или счет)
-    if parts[0] == "Счет":
-        # Обработка счета
-        account_number = parts[1]
-        masked_number = "**" + account_number[-4:]
-        return f"{parts[0]} {masked_number}"
+from src.masks import get_mask_account, get_mask_card_number
+
+
+def mask_account_card(value: str) -> str:
+    """функция принимает номер счета или номер карты"""
+    value_splited = value.split(" ")
+    new_list = []
+    for symbols in value_splited:
+        if symbols.isalpha():
+            the_first_part = symbols
+            new_list.append(the_first_part)
+            """ условие записывает первую буквенную часть в список """
+        else:
+            if len(symbols) == 16:
+                formatted_number = get_mask_card_number(symbols)
+                new_list.append(formatted_number)
+            elif len(symbols) == 20:
+                formatted_number = get_mask_account(symbols)
+                new_list.append(formatted_number)
+                """ побочное условие форматирует номер в зависимости от кол-ва цифр """
+            else:
+                return "Error: invalid number or account format"
+    return " ".join(new_list)
+
+
+if __name__ == "__main__":
+    result_1 = mask_account_card(input("Enter account card: "))
+    print(result_1)
+
+
+def get_date(date: typing.Any) -> typing.Any:  #
+    """принимаем дату"""
+    if isinstance(date, str):
+        if len(date) >= 10 and date[4] == "-" and date[7] == "-":
+            if int(date[8:10]) <= 31 and int(date[5:7]) <= 12:
+                date_used = date[8:10] + "." + date[5:7] + "." + date[:4]
+                return date_used
+            else:
+                return "This date doesn't exist"
+        else:
+            return "Please, enter the date in the 'year-month-day' format"
     else:
-        # Обработка карты
-        # Предполагается, что номер карты - последний элемент строки
-        card_number = parts[-1]
-        # Маскируем номер карты
-        first4 = card_number[:4]
-        last4 = card_number[-4:]
-        middle_masked = "**** ****"
-        return f"{parts[0]} {parts[1]} {first4} {middle_masked} {last4}"
+        if isinstance(date, list):
+            filter_date = []
+            for item in date:
+                if len(item) >= 10 and item[4] == "-" and item[7] == "-":
+                    if int(item[8:10]) <= 31 and int(item[5:7]) <= 12:
+                        date_used = item[8:10] + "." + item[5:7] + "." + item[:4]
+                        filter_date.append(date_used)
+                        return " ".join(filter_date)
+                else:
+                    return "Please, enter the date in the 'year-month-day' format"
+        else:
+            return "Please, enter the date in the 'year-month-day' format"
 
-def get_date(date_str: str) -> str:
-    """
-    Преобразует дату из формата "2024-03-11T02:26:18.671407" в "ДД.ММ.ГГГГ".
-    """
-    # Используем срезы или парсим дату
-    date_part = date_str.split("T")[0]
-    year, month, day = date_part.split("-")
-    return f"{day}.{month}.{year}"bgtedg
+
+if __name__ == "__main__":
+    result_2 = get_date(input("Enter date: "))
+    print(result_2)
