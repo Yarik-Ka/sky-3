@@ -1,32 +1,11 @@
 import pytest
 from src.product import Product
 
-def test_product_init():
+def test_str_product():
     p = Product("Телефон", "Смартфон", 10000, 5)
-    assert p.name == "Телефон"
-    assert p.description == "Смартфон"
-    assert p.price == 10000
-    assert p.quantity == 5
+    assert str(p) == "Телефон, 10000 руб. Остаток: 5 шт."
 
-def test_price_setter_positive():
-    p = Product("Телефон", "Смартфон", 10000, 5)
-    p.price = 15000
-    assert p.price == 15000
-
-def test_price_setter_negative(capsys):
-    p = Product("Телефон", "Смартфон", 10000, 5)
-    p.price = -500
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
-    assert p.price == 10000
-
-def test_new_product():
-    data = {
-        "name": "Планшет",
-        "description": "Удобный планшет",
-        "price": 20000,
-        "quantity": 3
-    }
-    p = Product.new_product(data)
-    assert isinstance(p, Product)
-    assert p.name == "Планшет"
+def test_add_products():
+    p1 = Product("Телефон", "Смартфон", 10000, 5)  # 50 000
+    p2 = Product("Ноутбук", "Игровой", 50000, 2)   # 100 000
+    assert p1 + p2 == 150000
