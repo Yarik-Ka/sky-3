@@ -95,3 +95,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+class Product:
+    def __init__(self, name, description, price, quantity):
+        self.name = name
+        self.description = description
+        self.__price = price  # приватная цена
+        self.quantity = quantity
+class Category:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+        self.__products = []  # приватный список товаров
+
