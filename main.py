@@ -7,10 +7,16 @@ if __name__ == "__main__":
     p2 = Product("Ноутбук", "Игровой ноутбук", 50000, 2)
 
     # Создаём категорию
-    electronics = Category("Электроника", "Гаджеты и техника", [p1, p2])
+    electronics = Category("Электроника", "Гаджеты и техника", [p1])
 
-    # Выводим информацию
-    print(f"Категория: {electronics.name} — {electronics.description}")
-    print(f"Товары в категории: {[p.name for p in electronics.products]}")
-    print(f"Всего категорий: {Category.category_count}")
-    print(f"Всего товаров: {Category.product_count}")
+    # Добавляем продукт через метод
+    electronics.add_product(p2)
+
+    # Выводим список товаров
+    print(electronics.products)
+
+    # Проверка геттера/сеттера цены
+    print(p1.price)
+    p1.price = -100  # Ошибка
+    p1.price = 9000  # Успешно
+    print(p1.price)
